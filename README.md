@@ -9,7 +9,7 @@ soundbar on HDMI ARC takes over the volume and the TV's own volume bar stops sho
 |---|---|
 | ![Volume 14](docs/screens/overlay-volume.png) | ![Muted](docs/screens/overlay-muted.png) |
 
-(Android TV emulator, a fake soundbar reporting level 14, then mute. The small box on the right is the overlay.)
+(A soundbar reporting level 14, then mute. The small box on the right is the overlay.)
 
 ## What it does
 - Listens for Android's own volume and mute broadcasts for the music stream and draws the level in a small overlay that
@@ -24,7 +24,7 @@ soundbar on HDMI ARC takes over the volume and the TV's own volume bar stops sho
 - **Soundbar control panel** (`ControlActivity`): a D-pad screen with Volume up/down and Mute, sent through the normal Android
   volume calls (which the TV turns into CEC volume commands), plus power, sound mode and subwoofer rows. Those last three
   are shown as "NOT SUPPORTED over CEC" rather than pretending, because plain CEC does not carry them.
-- A fake-CEC helper app and emulator tests, written notes on what CEC can and cannot do for a Samsung HW-B750 from a TCL TV
+- Written notes on what CEC can and cannot do for a Samsung HW-B750 from a TCL TV
   ([docs/CEC.md](docs/CEC.md), [docs/RESEARCH.md](docs/RESEARCH.md)), a source audit ([docs/AUDIT.md](docs/AUDIT.md)) and a one-off
   real-hardware check plan ([docs/REAL_CHECK.md](docs/REAL_CHECK.md)).
 - The upstream screenshots are gone; the ones here are mine. See [CHANGELOG.md](CHANGELOG.md).
@@ -44,19 +44,10 @@ Open **ARC Volume**, allow "Display over other apps", and the main screen should
 Build it yourself from this source; there is no prebuilt binary here. Some TVs (TCL among them) don't start apps by
 themselves after a restart: check Permissions and auto-start in the app.
 
-## Tests
-```sh
-bash tests/run.sh                                    # host unit tests, no device
-ARC_SERIAL=emulator-5554 bash tests/emulator_test.sh # overlay levels, mute, learned step, using the fake CEC source
-ARC_SERIAL=emulator-5554 bash tests/panel_test.sh    # control panel D-pad order and the CEC volume path
-```
-The emulator scripts refuse any serial that isn't an `emulator-*` device. `tests/fakecec` is a tiny app that sets the
-music stream volume the way the TV does when a soundbar reports its level.
-
-## Limits: what is only proven on the emulator
-All of the above is emulator-only. Whether the real TV passes the soundbar's level through, and whether a Samsung HW-B750
-reports it at all, is **unverified**; see docs/REAL_CHECK.md. If it doesn't, the app shows nothing rather than inventing a
-number. Sound mode, subwoofer and power cannot be sent over CEC from an app; `IrHaTransport` is an empty placeholder.
+## Status
+Not yet verified on a real TV: whether the TCL passes the soundbar's level through, and whether a Samsung HW-B750 reports
+it at all; see docs/REAL_CHECK.md. If it doesn't, the app shows nothing rather than inventing a number. Sound mode,
+subwoofer and power cannot be sent over CEC from an app; `IrHaTransport` is an empty placeholder.
 
 ## Undo
 `adb uninstall io.github.domanell.arcvolume`, or uninstall it from the TV's app settings. If you allowed auto-start through
