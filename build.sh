@@ -50,6 +50,18 @@ if [ ! -f "$android_jar" ] || [ ! -d "$build_tools" ]; then
     exit 1
 fi
 
+# Optional Home Assistant webhook (feature is off when empty). The URL is a private local
+# address: it lives in the git-ignored ha-webhook.url file or the ARC_HA_WEBHOOK_URL variable.
+webhook_url="${ARC_HA_WEBHOOK_URL:-}"
+if [ -z "$webhook_url" ] && [ -f ha-webhook.url ]; then
+    webhook_url="$(tr -d '[:space:]' < ha-webhook.url)"
+fi
+if [[ -n "$webhook_url" && ! "$webhook_url" =~ ^https?://[A-Za-z0-9._:/-]+$ ]]; then
+    echo "ha webhook URL must be plain http(s) with only letters, digits and ._:/-" >&2
+    exit 1
+fi
+printf '<resources><string name="ha_webhook_url">%s</string></resources>\n' "$webhook_url" > res/values/ha_webhook.xml
+
 rm -rf build
 mkdir -p build/classes build/dex
 
