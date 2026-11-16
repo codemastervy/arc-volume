@@ -2,7 +2,4 @@ build/
 *.keystore
 *.jks
 keys/
-res/values/ha_webhook.xml
-ha-webhook.url
-.env
 tests/fakecec/build/

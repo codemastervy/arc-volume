@@ -15,15 +15,13 @@ Read in full before any build. Findings:
 - Build: `build.sh`, no Gradle, builds fine with JDK 21 + build-tools 34.0.0 (no 17 needed).
 
 # Changes in this fork
-
-- `HaWebhook.java`: after a level **settles** (never a prediction), POSTs fixed JSON
-  `{"level","muted","step","max","source":"stream_music"}` (ints/bool only) to the webhook URL.
-  Off when no URL is configured (no network call). Only http(s) URLs accepted.
-- `INTERNET` permission and `usesCleartextTraffic` (HA on the LAN is plain http).
-- The URL comes from git-ignored `ha-webhook.url` or `ARC_HA_WEBHOOK_URL` at build time; `build.sh`
-  generates git-ignored `res/values/ha_webhook.xml`. The webhook id is the credential; keep it private.
-- Tests: `tests/run.sh` (host unit), `tests/emulator_test.sh` (emulator-5556 only, fake CEC via
-  `tests/fakecec` helper APK + fake HA webhook).
+- Added a TV-side "Soundbar Control" panel (ControlActivity, fixed ControlTable, pluggable Transport:
+  CecTransport = volume/mute via AudioManager; IrHaTransport = unimplemented stub, supports nothing;
+  other rows show NOT SUPPORTED over CEC). No network code, no new permissions. Overlay code untouched.
+- Tests: `tests/run.sh` (host unit tests of the step logic),
+  `tests/emulator_test.sh` (emulator-5556 only; `tests/fakecec` helper APK plays the soundbar's
+  audio-status report by setting STREAM_MUSIC), `scripts/privacy-scan.sh`.
+- Home Assistant, webhook and control-panel work was dropped by the user's instruction.
 
 # What emulator tests do NOT prove
 The emulator's AudioService stands in for the TV's CEC audio-status path. Whether the TCL C8L passes

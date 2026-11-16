@@ -169,7 +169,3 @@ Logs: `adb logcat -s ArcVolume`. To log every volume event too, run
 ## License
 
 MIT, see [LICENSE](LICENSE).
-
-## Fork: Home Assistant webhook
-Build with `ARC_HA_WEBHOOK_URL=http://<ha>:8123/api/webhook/<id> bash build.sh` (or put the URL in the
-git-ignored `ha-webhook.url`). Posts only settled levels. See `docs/AUDIT.md`, `tests/`.

@@ -8,13 +8,6 @@ public class UnitTest {
         else System.out.println("ok   " + what);
     }
     public static void main(String[] x) {
-        // webhook body is fixed shape
-        eq(HaWebhook.body(12, 2, false, 30),
-           "{\"level\":12,\"muted\":false,\"step\":2,\"max\":30,\"source\":\"stream_music\"}", "body shape");
-        eq(HaWebhook.validUrl(""), null, "empty url disables");
-        eq(HaWebhook.validUrl("file:///etc/passwd"), null, "non-http rejected");
-        eq(HaWebhook.validUrl(" http://10.0.2.2:8199/api/webhook/x "), "http://10.0.2.2:8199/api/webhook/x", "http ok");
-
         // step-1 bar: every change shown as is
         VolumePredictor p = new VolumePredictor(5, VolumePredictor.UNKNOWN, false, true, 0, 30);
         eq(p.onIndex(6), 6, "step1 shows 6");

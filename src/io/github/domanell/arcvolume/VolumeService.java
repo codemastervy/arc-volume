@@ -85,7 +85,6 @@ public class VolumeService extends Service {
     private WindowManager.LayoutParams layoutParams;
     private boolean overlayAdded;
     private VolumePredictor predictor;
-    private HaWebhook webhook;
     private long lastKeyPressAt = Long.MIN_VALUE / 2;
     private long hideAt;
     /** The current burst saw a learning pause, so it must not count as evidence. */
@@ -178,7 +177,6 @@ public class VolumeService extends Service {
                 step, step != VolumePredictor.UNKNOWN, !AppSettings.stepManual(this),
                 audio.getStreamMinVolume(AudioManager.STREAM_MUSIC),
                 audio.getStreamMaxVolume(AudioManager.STREAM_MUSIC));
-        webhook = new HaWebhook(this);
         createOverlayView();
         AppSettings.prefs(this).registerOnSharedPreferenceChangeListener(settingsListener);
         RestartJobService.schedule(this);
@@ -271,8 +269,6 @@ public class VolumeService extends Service {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
             Log.d(TAG, "settled: volume=" + volume + " muted=" + muted + " learn=" + learn);
         }
-        webhook.publish(volume, predictor.step(), muted,
-                audio.getStreamMaxVolume(AudioManager.STREAM_MUSIC));
         badge.setState(volume, muted);
         // The badge is down if the position editor paused it meanwhile; bring it back in time.
         if (!overlayAdded && hideAt > SystemClock.uptimeMillis()) {
