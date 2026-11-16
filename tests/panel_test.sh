@@ -3,7 +3,8 @@
 # unsupported rows labelled. NEVER run against a real TV.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-ADB="adb -s emulator-5556"; PKG=io.github.domanell.arcvolume; fails=0; D=$(mktemp -d)/u.xml
+SERIAL=${ARC_SERIAL:-emulator-5556}; case "$SERIAL" in emulator-*) ;; *) echo "emulator only"; exit 2;; esac
+ADB="adb -s $SERIAL"; PKG=io.github.domanell.arcvolume; fails=0; D=$(mktemp -d)/u.xml
 check() { if [ "$2" = "$3" ]; then echo "ok   $1"; else echo "FAIL $1: got [$2] want [$3]"; fails=$((fails+1)); fi; }
 focus() { $ADB shell uiautomator dump /sdcard/u.xml >/dev/null 2>&1; $ADB exec-out cat /sdcard/u.xml > "$D"; python3 -I tests/focus.py "$D"; }
 key() { $ADB shell input keyevent "$1"; sleep 0.4; }

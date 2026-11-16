@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 # Emulator test with a FAKE CEC source: tests/fakecec sets STREAM_MUSIC like the TV does when the
 # soundbar reports <Report Audio Status>. Asserts what the overlay shows (debug log) and that the
-# overlay window exists. Serial fixed to emulator-5556; NEVER run against a real TV.
+# overlay window exists. Serial from ARC_SERIAL (default emulator-5556, must be an emulator); NEVER run against a real TV.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-ADB="adb -s emulator-5556"; PKG=io.github.domanell.arcvolume; fails=0
+SERIAL=${ARC_SERIAL:-emulator-5556}; case "$SERIAL" in emulator-*) ;; *) echo "emulator only"; exit 2;; esac
+ADB="adb -s $SERIAL"; PKG=io.github.domanell.arcvolume; fails=0
 check() { if [ "$2" = "$3" ]; then echo "ok   $1"; else echo "FAIL $1: got [$2] want [$3]"; fails=$((fails+1)); fi; }
 vol() { $ADB shell am broadcast -n test.fakecec/.SetReceiver --ei level "$1" >/dev/null; }
 mute() { $ADB shell am broadcast -n test.fakecec/.SetReceiver --es mute "$1" >/dev/null; }
