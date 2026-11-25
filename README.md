@@ -45,9 +45,16 @@ Build it yourself from this source; there is no prebuilt binary here. Some TVs (
 themselves after a restart: check Permissions and auto-start in the app.
 
 ## Status
-Not yet verified on a real TV: whether the TCL passes the soundbar's level through, and whether a Samsung HW-B750 reports
-it at all; see docs/REAL_CHECK.md. If it doesn't, the app shows nothing. Sound mode,
-subwoofer and power cannot be sent over CEC from an app; `IrHaTransport` is an empty placeholder.
+Checked on a TCL Smart TV Pro (Android 14) with a Samsung HW-B750F over HDMI ARC: pressing volume up and down on the TV
+remote shows the soundbar's level, and it matched the bar's own display. The app shows only the level the soundbar reports; if
+the TV doesn't pass a report through, nothing is shown. Other TV and soundbar pairs are untested. Sound mode, subwoofer and
+power cannot be sent over CEC from an app; `IrHaTransport` is an empty placeholder.
+
+### Auto-start on TCL
+TCL's permission shield can block apps from starting at boot. With adb connected to the TV, this worked:
+`adb shell cmd appops set io.github.domanell.arcvolume AUTO_START allow` (also `RUN_IN_BACKGROUND` and `RUN_ANY_IN_BACKGROUND`
+allow, and `cmd deviceidle whitelist +io.github.domanell.arcvolume`). The TV then starts the app on its own, but it delays
+that by about a minute after power-on.
 
 ## Undo
 `adb uninstall io.github.domanell.arcvolume`, or uninstall it from the TV's app settings. If you allowed auto-start through
