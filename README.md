@@ -52,12 +52,12 @@ power cannot be sent over CEC from an app; `IrHaTransport` is an empty placehold
 
 ### Auto-start on TCL
 TCL's permission shield can block apps from starting at boot. With adb connected to the TV, this worked:
-`adb shell cmd appops set io.github.domanell.arcvolume AUTO_START allow` (also `RUN_IN_BACKGROUND` and `RUN_ANY_IN_BACKGROUND`
-allow, and `cmd deviceidle whitelist +io.github.domanell.arcvolume`). The TV then starts the app on its own, but it delays
+`adb shell cmd appops set io.github.codemastervy.arcvolume AUTO_START allow` (also `RUN_IN_BACKGROUND` and `RUN_ANY_IN_BACKGROUND`
+allow, and `cmd deviceidle whitelist +io.github.codemastervy.arcvolume`). The TV then starts the app on its own, but it delays
 that by about a minute after power-on.
 
 ## Undo
-`adb uninstall io.github.domanell.arcvolume`, or uninstall it from the TV's app settings. If you allowed auto-start through
+`adb uninstall io.github.codemastervy.arcvolume`, or uninstall it from the TV's app settings. If you allowed auto-start through
 ADB, that goes with the app.
 
 ## Credit

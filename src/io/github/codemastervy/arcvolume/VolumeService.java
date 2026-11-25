@@ -1,4 +1,4 @@
-package io.github.domanell.arcvolume;
+package io.github.codemastervy.arcvolume;
 
 import android.app.ActivityManager;
 import android.app.Notification;
@@ -45,9 +45,9 @@ public class VolumeService extends Service {
     private static final long FADE_OUT_MS = 150;
 
     /** Start intent extra naming who started the service, for the log. */
-    static final String EXTRA_REASON = "io.github.domanell.arcvolume.REASON";
+    static final String EXTRA_REASON = "io.github.codemastervy.arcvolume.REASON";
     /** Start intent extra asking to show the badge once with the current level. */
-    private static final String EXTRA_PREVIEW = "io.github.domanell.arcvolume.PREVIEW";
+    private static final String EXTRA_PREVIEW = "io.github.codemastervy.arcvolume.PREVIEW";
 
     static final int STOPPED = 0;
     /** Running, but the system did not accept the foreground start, so it may stop the service. */

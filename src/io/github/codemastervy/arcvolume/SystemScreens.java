@@ -1,4 +1,4 @@
-package io.github.domanell.arcvolume;
+package io.github.codemastervy.arcvolume;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;

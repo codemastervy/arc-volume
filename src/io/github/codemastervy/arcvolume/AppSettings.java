@@ -1,4 +1,4 @@
-package io.github.domanell.arcvolume;
+package io.github.codemastervy.arcvolume;
 
 import android.content.Context;
 import android.content.SharedPreferences;

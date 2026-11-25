@@ -1,4 +1,4 @@
-package io.github.domanell.arcvolume;
+package io.github.codemastervy.arcvolume;
 
 /** How a control reaches the soundbar. The panel asks each transport in order. */
 interface Transport {

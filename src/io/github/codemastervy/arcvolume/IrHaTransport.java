@@ -1,4 +1,4 @@
-package io.github.domanell.arcvolume;
+package io.github.codemastervy.arcvolume;
 
 /**
  * Placeholder for the later fallback (Home Assistant webhook -> IR blaster on the NUC). Deliberately

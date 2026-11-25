@@ -1,4 +1,4 @@
-package io.github.domanell.arcvolume;
+package io.github.codemastervy.arcvolume;
 
 /** The fixed list of soundbar controls. Only ids from this table are ever sent to a transport. */
 final class ControlTable {

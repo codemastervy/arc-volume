@@ -1,4 +1,4 @@
-package io.github.domanell.arcvolume;
+package io.github.codemastervy.arcvolume;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

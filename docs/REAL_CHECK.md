@@ -8,4 +8,4 @@ Prereqs: Android 14 on the TV (confirmed). Nothing else is touched.
 6. Press Mute: crossed-out speaker should show.
 7. Pass = number tracks the bar. Fail = TV shows only +/- and no number, or the number never matches: then the B750 does not report its level over CEC (or the TCL does not send CEC volume); I report that and do not fake a number.
 8. Optional read-only extra (needs your yes): `adb shell dumpsys hdmi_control` (see CAPTURE_PLAN.md).
-9. Cleanup: `adb uninstall io.github.domanell.arcvolume`, turn debugging off.
+9. Cleanup: `adb uninstall io.github.codemastervy.arcvolume`, turn debugging off.
