@@ -5,16 +5,12 @@ import android.content.SharedPreferences;
 import android.provider.Settings;
 
 /**
- * Saved app settings: badge position and scale, the soundbar step and its mode, and what the
+ * Saved app settings: badge position and scale, and what the
  * app has seen of auto-start. Shared by the service and the app screens, which run in one
  * process, so the service picks up changes through a preference listener.
  */
 final class AppSettings {
     static final String PREFS = "arc_volume";
-
-    static final String KEY_STEP = "soundbar_step";
-    /** True when the user fixed the step; observations then never replace it. */
-    static final String KEY_STEP_MANUAL = "step_manual";
 
     /** Badge right edge, in dp from the right screen edge. */
     static final String KEY_RIGHT_DP = "badge_right_dp";
@@ -43,18 +39,6 @@ final class AppSettings {
 
     static SharedPreferences prefs(Context context) {
         return context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-    }
-
-    /**
-     * The saved step, or {@link VolumePredictor#UNKNOWN} while none is determined; the
-     * predictor then uses {@link VolumePredictor#DEFAULT_STEP}.
-     */
-    static int step(Context context) {
-        return prefs(context).getInt(KEY_STEP, VolumePredictor.UNKNOWN);
-    }
-
-    static boolean stepManual(Context context) {
-        return prefs(context).getBoolean(KEY_STEP_MANUAL, false);
     }
 
     static int rightDp(Context context) {

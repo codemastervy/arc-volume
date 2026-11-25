@@ -6,7 +6,7 @@ Read in full before any build. Findings:
   `STREAM_MUTE_CHANGED_ACTION` for `STREAM_MUSIC` and reads `AudioManager.getStreamVolume`. The number
   is the soundbar's level only when the TV runs ARC "full volume" mode and writes the soundbar's
   `<Report Audio Status>` into that stream. On the B750 this is **unverified** (the real check).
-- `VolumePredictor` / `StepCalibration`: pure integer logic, learn the bar's per-press step.
+- The overlay shows only the settled stream value (a report); it estimates nothing.
 - **Upstream had no INTERNET permission, no network code, no `exec`/`Runtime`.** Only reflection:
   `SystemProperties.get` for TCL Guard flags (`SystemScreens`).
 - Permissions upstream: FOREGROUND_SERVICE(_SPECIAL_USE), SYSTEM_ALERT_WINDOW, RECEIVE_BOOT_COMPLETED.
@@ -18,9 +18,7 @@ Read in full before any build. Findings:
 - Added a TV-side "Soundbar Control" panel (ControlActivity, fixed ControlTable, pluggable Transport:
   CecTransport = volume/mute via AudioManager; IrHaTransport = unimplemented stub, supports nothing;
   other rows show NOT SUPPORTED over CEC). No network code, no new permissions. Overlay code untouched.
-- Tests: `tests/run.sh` (host unit tests of the step logic),
-  `tests/emulator_test.sh` (emulator-5556 only; `tests/fakecec` helper APK plays the soundbar's
-  audio-status report by setting STREAM_MUSIC), `scripts/privacy-scan.sh`.
+- `scripts/privacy-scan.sh`.
 - Home Assistant, webhook and control-panel work was dropped by the user's instruction.
 
 # What emulator tests do NOT prove

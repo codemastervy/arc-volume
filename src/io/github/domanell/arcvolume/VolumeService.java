@@ -24,7 +24,8 @@ import android.view.WindowManager;
 
 /**
  * Shows the STREAM_MUSIC index (the soundbar's own volume level reported over CEC)
- * in a short-lived overlay badge whenever it changes.
+ * in a short-lived overlay badge. Only a level that has been reported is shown: nothing is
+ * estimated, and with no report nothing is drawn.
  */
 public class VolumeService extends Service {
     private static final String TAG = "ArcVolume";
@@ -32,19 +33,14 @@ public class VolumeService extends Service {
     private static final int NOTIFICATION_ID = 1;
 
     /*
-     * The soundbar report lands about 200-300 ms after the local index change of a key press.
-     * After SETTLE_MS without changes the actual index is shown and confirmed, which corrects
-     * any wrong prediction (see VolumePredictor).
+     * A key press may first move the local index, then the soundbar's report sets the real level
+     * about 200-300 ms later. The badge shows the level only once the index has stopped changing
+     * for SETTLE_MS, so what is shown is the last value reported, never an intermediate.
      */
     private static final long SETTLE_MS = 400;
 
-    /*
-     * The TCL panel hides 3000 ms after the last key press; soundbar reports do not extend it.
-     * Without a recent key press (mute, soundbar remote) the event itself already lags the
-     * key by about REPORT_LATENCY_MS.
-     */
+    /* The TCL panel hides 3000 ms after the last key press; the badge follows it. */
     private static final long PANEL_TIMEOUT_MS = 3000;
-    private static final long REPORT_LATENCY_MS = 300;
     private static final long FADE_IN_MS = 100;
     private static final long FADE_OUT_MS = 150;
 
@@ -63,11 +59,10 @@ public class VolumeService extends Service {
     private static final String EXTRA_STREAM_TYPE = "android.media.EXTRA_VOLUME_STREAM_TYPE";
 
     /*
-     * Pauses set by the app screens, which run in this process on the main thread: the position
-     * editor shows its own sample badge, and the step measurement must not race the learner.
+     * Pause set by the position editor, which runs in this process on the main thread and
+     * shows its own sample badge.
      */
     private static boolean overlayPaused;
-    private static boolean learningPaused;
     /** The running instance, so a pause can take the badge down at once. */
     private static VolumeService running;
 
@@ -84,11 +79,7 @@ public class VolumeService extends Service {
     private VolumeBadgeView badge;
     private WindowManager.LayoutParams layoutParams;
     private boolean overlayAdded;
-    private VolumePredictor predictor;
-    private long lastKeyPressAt = Long.MIN_VALUE / 2;
     private long hideAt;
-    /** The current burst saw a learning pause, so it must not count as evidence. */
-    private boolean burstPaused;
 
     /*
      * Static nested class instead of an anonymous one: d8 8.2.2 (build-tools 34.0.0) crashes on
@@ -116,17 +107,6 @@ public class VolumeService extends Service {
         if (paused && running != null) {
             running.handler.removeCallbacks(running.hideRunnable);
             running.removeOverlay();
-        }
-    }
-
-    /**
-     * Stops step learning while the user measures the step. A burst that is still open when the
-     * pause starts or ends is excluded too. Main thread only.
-     */
-    static void setLearningPaused(boolean paused) {
-        learningPaused = paused;
-        if (running != null) {
-            running.burstPaused = true;
         }
     }
 
@@ -172,11 +152,6 @@ public class VolumeService extends Service {
         running = this;
         audio = getSystemService(AudioManager.class);
         windows = getSystemService(WindowManager.class);
-        int step = AppSettings.step(this);
-        predictor = new VolumePredictor(audio.getStreamVolume(AudioManager.STREAM_MUSIC),
-                step, step != VolumePredictor.UNKNOWN, !AppSettings.stepManual(this),
-                audio.getStreamMinVolume(AudioManager.STREAM_MUSIC),
-                audio.getStreamMaxVolume(AudioManager.STREAM_MUSIC));
         createOverlayView();
         AppSettings.prefs(this).registerOnSharedPreferenceChangeListener(settingsListener);
         RestartJobService.schedule(this);
@@ -203,7 +178,6 @@ public class VolumeService extends Service {
                     .apply();
         }
         Log.i(TAG, "service started, volume=" + audio.getStreamVolume(AudioManager.STREAM_MUSIC)
-                + " step=" + predictor.step() + " learning=" + predictor.learning()
                 + " foreground=" + foreground + " reason=" + reason
                 + " autoStartScreen=" + SystemScreens.autoStartScreen(this));
         if (intent != null && intent.getBooleanExtra(EXTRA_PREVIEW, false)) {
@@ -228,52 +202,20 @@ public class VolumeService extends Service {
     }
 
     private void onVolumeEvent(String action) {
-        int volume = audio.getStreamVolume(AudioManager.STREAM_MUSIC);
-        boolean muted = audio.isStreamMute(AudioManager.STREAM_MUSIC);
-        long now = SystemClock.uptimeMillis();
-        int shown = volume;
-        boolean keyPress = false;
-        if (ACTION_VOLUME_CHANGED.equals(action)) {
-            shown = predictor.onIndex(volume);
-            keyPress = predictor.wasKeyPress();
-        }
-        if (keyPress) {
-            lastKeyPressAt = now;
-            hideAt = now + PANEL_TIMEOUT_MS;
-        } else if (now - lastKeyPressAt >= PANEL_TIMEOUT_MS) {
-            hideAt = now + PANEL_TIMEOUT_MS - REPORT_LATENCY_MS;
-        }
-        if (learningPaused) {
-            burstPaused = true;
-        }
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG, action + ": stream=" + volume + " muted=" + muted + " shown=" + shown
-                    + " key=" + keyPress + " hideIn=" + (hideAt - now));
-        }
-        badge.setState(shown, muted);
-        showOverlay();
+        Log.i(TAG, action + ": stream=" + audio.getStreamVolume(AudioManager.STREAM_MUSIC)
+                + " muted=" + audio.isStreamMute(AudioManager.STREAM_MUSIC));
         handler.removeCallbacks(settleRunnable);
         handler.postDelayed(settleRunnable, SETTLE_MS);
     }
 
+    /** The index has stopped changing: show the level the system now holds. */
     private void settle() {
         int volume = audio.getStreamVolume(AudioManager.STREAM_MUSIC);
         boolean muted = audio.isStreamMute(AudioManager.STREAM_MUSIC);
-        boolean learn = !learningPaused && !burstPaused;
-        burstPaused = false;
-        if (predictor.settle(volume, learn)) {
-            AppSettings.prefs(this).edit()
-                    .putInt(AppSettings.KEY_STEP, predictor.step()).apply();
-            Log.i(TAG, "learned soundbar step " + predictor.step());
-        }
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG, "settled: volume=" + volume + " muted=" + muted + " learn=" + learn);
-        }
+        Log.i(TAG, "settled: stream=" + volume + " muted=" + muted);
         badge.setState(volume, muted);
-        // The badge is down if the position editor paused it meanwhile; bring it back in time.
-        if (!overlayAdded && hideAt > SystemClock.uptimeMillis()) {
-            showOverlay();
-        }
+        hideAt = SystemClock.uptimeMillis() + PANEL_TIMEOUT_MS;
+        showOverlay();
     }
 
     private void showPreview() {
@@ -284,17 +226,7 @@ public class VolumeService extends Service {
     }
 
     private void onSettingChanged(String key) {
-        if (AppSettings.KEY_STEP.equals(key) || AppSettings.KEY_STEP_MANUAL.equals(key)) {
-            int step = AppSettings.step(this);
-            boolean determined = step != VolumePredictor.UNKNOWN;
-            boolean learning = !AppSettings.stepManual(this);
-            if ((determined && step != predictor.step()) || determined != predictor.determined()
-                    || learning != predictor.learning()) {
-                predictor.configure(step, determined, learning);
-                Log.i(TAG, "step set to " + predictor.step() + " determined=" + determined
-                        + " learning=" + learning);
-            }
-        } else if (AppSettings.KEY_RIGHT_DP.equals(key) || AppSettings.KEY_TOP_DP.equals(key)
+        if (AppSettings.KEY_RIGHT_DP.equals(key) || AppSettings.KEY_TOP_DP.equals(key)
                 || AppSettings.KEY_SCALE.equals(key)) {
             applyPlacement();
         }

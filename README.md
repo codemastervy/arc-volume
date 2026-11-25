@@ -15,9 +15,9 @@ soundbar on HDMI ARC takes over the volume and the TV's own volume bar stops sho
 - Listens for Android's own volume and mute broadcasts for the music stream and draws the level in a small overlay that
   hides after a moment. It does not speak CEC itself: when the TV is in ARC "full volume" mode, the TV writes the soundbar's
   reported level into that stream, and this app displays it.
-- Learns how many levels the soundbar moves per press (a step of 2 is common) so the number is right straight after a press,
-  then corrects it when the soundbar's report arrives.
-- Shows a crossed-out speaker when muted. You can move and scale the box.
+- Shows only the level the soundbar reports. The number appears once the reported level has arrived, a moment after a press;
+  it is never estimated. If the TV does not pass the soundbar's reports through, nothing is shown.
+- Shows a crossed-out speaker when the system reports the stream as muted. You can move and scale the box.
 - Needs Android 14+ and the "Display over other apps" permission. It has no internet permission and no accounts.
 
 ## What is different from upstream
@@ -46,7 +46,7 @@ themselves after a restart: check Permissions and auto-start in the app.
 
 ## Status
 Not yet verified on a real TV: whether the TCL passes the soundbar's level through, and whether a Samsung HW-B750 reports
-it at all; see docs/REAL_CHECK.md. If it doesn't, the app shows nothing rather than inventing a number. Sound mode,
+it at all; see docs/REAL_CHECK.md. If it doesn't, the app shows nothing. Sound mode,
 subwoofer and power cannot be sent over CEC from an app; `IrHaTransport` is an empty placeholder.
 
 ## Undo

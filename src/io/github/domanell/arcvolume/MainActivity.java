@@ -27,7 +27,6 @@ public class MainActivity extends Activity {
     private TextView statusDetail;
     private Ui.Row allowRow;
     private Ui.Row positionRow;
-    private Ui.Row stepRow;
     private Ui.Row permissionsRow;
     private Ui.Row previewRow;
     /** The overlay permission was offered once since this screen was created. */
@@ -57,9 +56,6 @@ public class MainActivity extends Activity {
         positionRow = Ui.row(this, "Position and size",
                 v -> startActivity(new Intent(this, PositionActivity.class)));
         Ui.add(column, positionRow.view, 20);
-        stepRow = Ui.row(this, "Volume step",
-                v -> startActivity(new Intent(this, StepActivity.class)));
-        Ui.add(column, stepRow.view, 8);
         permissionsRow = Ui.row(this, "Permissions and auto-start",
                 v -> startActivity(new Intent(this, PermissionsActivity.class)));
         Ui.add(column, permissionsRow.view, 8);
@@ -118,10 +114,6 @@ public class MainActivity extends Activity {
 
         positionRow.setSummary((AppSettings.defaultPosition(this)
                 ? "Default position" : "Custom position") + ", " + AppSettings.scale(this) + "%");
-        int step = AppSettings.step(this);
-        stepRow.setSummary((AppSettings.stepManual(this) ? "Manual" : "Automatic") + ", "
-                + (step == VolumePredictor.UNKNOWN
-                        ? VolumePredictor.DEFAULT_STEP + " (default)" : String.valueOf(step)));
         permissionsRow.setSummary(!overlay ? "Display over other apps is not allowed"
                 : AppSettings.autoStartVerified(this)
                         ? "Auto-start verified after TV boot" : "Auto-start not verified yet");
